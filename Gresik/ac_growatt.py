@@ -16,17 +16,17 @@ import os
 
 # Load Env Key and Value
 load_dotenv()
-class Ac_aki():
+class Ac_Growatt():
     # Inisialisasi Variabel
     def __init__(self):
             self.broker_url = os.getenv('MQTT_HOST')
             self.broker_port = int(os.getenv('MQTT_PORT'))
             self.clean_session = True
-            self.topic = "tele/batam/ac_aki/SENSOR"
-            self.status = "tele/batam/ac_aki/LWT"
+            self.topic = "tele/gresik/ac_growatt/SENSOR"
+            self.status = "tele/gresik/ac_growatt/LWT"
             self.tool_status = ""
-            self.table_name = "ac_aki_Batam"
-            self.client_id = f'python-mqtt-ac_aki_batam{random.randint(0, 1000)}'
+            self.table_name = "ac_growatt_Gresik"
+            self.client_id = f'python-mqtt-ac_growatt_gresik{random.randint(0, 1000)}'
             self.username = os.getenv('MQTT_USERNAME')
             self.password = os.getenv('MQTT_PASSWORD')
             self.connected = False
@@ -156,5 +156,5 @@ class Ac_aki():
 
 
 
-tes  = Ac_aki()
+tes  = Ac_Growatt()
 tes.run()

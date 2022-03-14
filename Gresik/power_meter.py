@@ -13,20 +13,20 @@ from telethon.sync import TelegramClient
 from telethon.tl.types import InputPeerUser, InputPeerChannel
 from telethon import TelegramClient, sync, events
 import os
+import datetime
 
 # Load Env Key and Value
 load_dotenv()
-class Ac_aki():
+class Power_meter():
     # Inisialisasi Variabel
     def __init__(self):
             self.broker_url = os.getenv('MQTT_HOST')
             self.broker_port = int(os.getenv('MQTT_PORT'))
             self.clean_session = True
-            self.topic = "tele/batam/ac_aki/SENSOR"
-            self.status = "tele/batam/ac_aki/LWT"
-            self.tool_status = ""
-            self.table_name = "ac_aki_Batam"
-            self.client_id = f'python-mqtt-ac_aki_batam{random.randint(0, 1000)}'
+            self.topic = "gresik/powermeter"
+            self.tool_status = "Online"
+            self.table_name = "powermeter_gresiks"
+            self.client_id = f'python-mqtt-power_meter_Gresik{random.randint(0, 1000)}'
             self.username = os.getenv('MQTT_USERNAME')
             self.password = os.getenv('MQTT_PASSWORD')
             self.connected = False
@@ -68,7 +68,7 @@ class Ac_aki():
             client.username_pw_set(self.username, self.password)
             client.connect(self.broker_url, self.broker_port, 15)
             client.on_connect = self.on_connect
-            client.subscribe([(self.topic,0),(self.status,0)], qos=1) 
+            client.subscribe([(self.topic,0)], qos=1) 
             client.on_message = self.on_message
             client.loop_start()
 
@@ -96,45 +96,39 @@ class Ac_aki():
 
     def on_message(self,client,userdata,message):
 
-
-        if(message.payload.decode('utf-8') == "Online" or message.payload.decode('utf-8') == "Offline"):
-            print("Status : " + message.payload.decode('utf-8'))
-            self.tool_status = message.payload.decode('utf-8')
-        else:
-            # # Convert string to dict (data dari broker)
-            convertedDict = json.loads(message.payload.decode('utf-8'))
-        
-            # # Ambil nilai tegangan_listrik
-            tegangan_listrik = int(convertedDict['ENERGY']['Voltage'])
-            power = int(convertedDict['ENERGY']['Power'])
-
-
-            # # Ambil nilai topic
-            topic = str(message.topic)
-
-            # # Message
-            # print("Message Received " + str(convertedDict))
-            # print("Tegangan Listrik " + str(tegangan_listrik))
-            print("Topic On " + topic)
-
-            # # Insert to Db after receive message
-            self.insertDb(topic,tegangan_listrik,power,convertedDict)
-
-            # # Send to telegram
-            self.send_message(tegangan_listrik,topic,self.tool_status)
+        topic = str(message.topic)
+        date = datetime.datetime.now()
+        volt_pln = message.payload.decode('utf-8').split(",")[0]
+        arus_pln = message.payload.decode('utf-8').split(",")[1]
+        power_pln = message.payload.decode('utf-8').split(",")[2]
+        freq_pln = message.payload.decode('utf-8').split(",")[3]
+        volt_genset = message.payload.decode('utf-8').split(",")[4]
+        arus_genset = message.payload.decode('utf-8').split(",")[5]
+        power_genset = message.payload.decode('utf-8').split(",")[6]
+        freq_genset = message.payload.decode('utf-8').split(",")[7]
+        full_message = message.payload.decode('utf-8')
+        print(volt_pln)
+        print(message.payload.decode('utf-8'))
 
 
-    def insertDb(self,topic,tegangan_listrik,power,full_message):
+        # # Insert to Db after receive message
+        self.insertDb(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date)
+
+        # # Send to telegram
+        self.send_message(volt_pln,topic,self.tool_status)
+
+
+    def insertDb(self,topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date):
         full_message = str(full_message)
-        print(full_message)
+        now = datetime.datetime.now()
         try:
-            self.mydb.execute(f"INSERT INTO {self.table_name} (Topic,Voltage,Power,Full_message) VALUES (%s,%s,%s,%s)",(topic,tegangan_listrik,power,full_message))
+            self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date))
         except Exception as e:
             print(e)
             print("tes")
-        if(int(tegangan_listrik) < self.voltage_indicator):
+        if(float(volt_pln) < self.voltage_indicator):
             try:
-                self.mydb.execute(f"INSERT INTO {self.table_name} (Topic,Voltage,Power,Full_message) VALUES (%s,%s,%s,%s)",(topic,tegangan_listrik,power,full_message))
+                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date))
                 self.db.commit()
             except Exception as e:
                 print(e)
@@ -143,7 +137,7 @@ class Ac_aki():
                 print("Succesfully save to database ")
     
     def send_message(self,tegangan_listrik,topic,status):
-        if(int(tegangan_listrik) < self.voltage_indicator):
+        if(float(tegangan_listrik) < self.voltage_indicator):
             try:
                 telegram_send.send(messages=["Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik)])
             except Exception as e:
@@ -156,5 +150,5 @@ class Ac_aki():
 
 
 
-tes  = Ac_aki()
+tes  = Power_meter()
 tes.run()
