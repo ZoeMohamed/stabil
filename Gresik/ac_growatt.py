@@ -1,5 +1,6 @@
+from datetime import datetime
 from operator import truediv
-from sqlite3 import connect
+from sqlite3 import Date, connect
 import time
 from dotenv import load_dotenv
 import paho.mqtt.client as mqttclient
@@ -13,6 +14,7 @@ from telethon.sync import TelegramClient
 from telethon.tl.types import InputPeerUser, InputPeerChannel
 from telethon import TelegramClient, sync, events
 import os
+import datetime
 
 # Load Env Key and Value
 load_dotenv()
@@ -25,7 +27,7 @@ class Ac_Growatt():
             self.topic = "tele/gresik/ac_growatt/SENSOR"
             self.status = "tele/gresik/ac_growatt/LWT"
             self.tool_status = ""
-            self.table_name = "ac_growatt_Gresik"
+            self.table_name = "acgrowatt_gresiks"
             self.client_id = f'python-mqtt-ac_growatt_gresik{random.randint(0, 1000)}'
             self.username = os.getenv('MQTT_USERNAME')
             self.password = os.getenv('MQTT_PASSWORD')
@@ -101,12 +103,25 @@ class Ac_Growatt():
             print("Status : " + message.payload.decode('utf-8'))
             self.tool_status = message.payload.decode('utf-8')
         else:
+
             # # Convert string to dict (data dari broker)
             convertedDict = json.loads(message.payload.decode('utf-8'))
         
             # # Ambil nilai tegangan_listrik
             tegangan_listrik = int(convertedDict['ENERGY']['Voltage'])
+            temperature = int(convertedDict['AM2301']['Temperature'])
             power = int(convertedDict['ENERGY']['Power'])
+            humidity=int(convertedDict['AM2301']['Humidity'])
+            date = datetime.datetime.now()
+
+            print(tegangan_listrik)
+            print(temperature)
+            print(power)
+            print(humidity)
+            print(date)
+
+            
+
 
 
             # # Ambil nilai topic
@@ -118,23 +133,25 @@ class Ac_Growatt():
             print("Topic On " + topic)
 
             # # Insert to Db after receive message
-            self.insertDb(topic,tegangan_listrik,power,convertedDict)
+            self.insertDb(topic,convertedDict,tegangan_listrik,temperature,humidity,power,date)
 
             # # Send to telegram
             self.send_message(tegangan_listrik,topic,self.tool_status)
 
 
-    def insertDb(self,topic,tegangan_listrik,power,full_message):
+    def insertDb(self,topic,full_message,tegangan_listrik,temperature,humidity,power,date):
         full_message = str(full_message)
         print(full_message)
         try:
-            self.mydb.execute(f"INSERT INTO {self.table_name} (Topic,Voltage,Power,Full_message) VALUES (%s,%s,%s,%s)",(topic,tegangan_listrik,power,full_message))
+            self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date) VALUES (%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,temperature,humidity,power,date))
+            self.db.commit()
+
         except Exception as e:
             print(e)
             print("tes")
         if(int(tegangan_listrik) < self.voltage_indicator):
             try:
-                self.mydb.execute(f"INSERT INTO {self.table_name} (Topic,Voltage,Power,Full_message) VALUES (%s,%s,%s,%s)",(topic,tegangan_listrik,power,full_message))
+                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date) VALUES (%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,temperature,humidity,power,date))
                 self.db.commit()
             except Exception as e:
                 print(e)
@@ -158,3 +175,4 @@ class Ac_Growatt():
 
 tes  = Ac_Growatt()
 tes.run()
+

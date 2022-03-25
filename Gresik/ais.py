@@ -13,6 +13,7 @@ from telethon.sync import TelegramClient
 from telethon.tl.types import InputPeerUser, InputPeerChannel
 from telethon import TelegramClient, sync, events
 import os
+import datetime
 
 # Load Env Key and Value
 load_dotenv()
@@ -25,7 +26,7 @@ class Ais():
             self.topic = "tele/gresik/ais/SENSOR"
             self.status = "tele/gresik/ais/LWT"
             self.tool_status = ""
-            self.table_name = "ais_Gresik"
+            self.table_name = "aisfuruno_gresiks"
             self.client_id = f'python-mqtt-ais_gresik{random.randint(0, 1000)}'
             self.username = os.getenv('MQTT_USERNAME')
             self.password = os.getenv('MQTT_PASSWORD')
@@ -101,16 +102,23 @@ class Ais():
             print("Status : " + message.payload.decode('utf-8'))
             self.tool_status = message.payload.decode('utf-8')
         else:
+
+            # # Ambil nilai topic
+            topic = str(message.topic)
+
             # # Convert string to dict (data dari broker)
             convertedDict = json.loads(message.payload.decode('utf-8'))
         
             # # Ambil nilai tegangan_listrik
             tegangan_listrik = int(convertedDict['ENERGY']['Voltage'])
-            power = int(convertedDict['ENERGY']['Power'])
 
+            current_date = datetime.datetime.now()
+            formatted_date = datetime.date.strftime(current_date, "%m/%d/%Y/%H:%M:%S")
 
-            # # Ambil nilai topic
-            topic = str(message.topic)
+            print(convertedDict)
+
+            print(formatted_date)
+
 
             # # Message
             # print("Message Received " + str(convertedDict))
@@ -118,29 +126,31 @@ class Ais():
             print("Topic On " + topic)
 
             # # Insert to Db after receive message
-            self.insertDb(topic,tegangan_listrik,power,convertedDict)
+            self.insertDb(topic,convertedDict,tegangan_listrik,formatted_date,current_date)
 
             # # Send to telegram
             self.send_message(tegangan_listrik,topic,self.tool_status)
 
-
-    def insertDb(self,topic,tegangan_listrik,power,full_message):
+   
+    def insertDb(self,topic,full_message,tegangan_listrik,formatted_date,current_date):
         full_message = str(full_message)
         print(full_message)
         try:
-            self.mydb.execute(f"INSERT INTO {self.table_name} (Topic,Voltage,Power,Full_message) VALUES (%s,%s,%s,%s)",(topic,tegangan_listrik,power,full_message))
+            self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,formatted_date,current_date))
         except Exception as e:
             print(e)
             print("tes")
         if(int(tegangan_listrik) < self.voltage_indicator):
             try:
-                self.mydb.execute(f"INSERT INTO {self.table_name} (Topic,Voltage,Power,Full_message) VALUES (%s,%s,%s,%s)",(topic,tegangan_listrik,power,full_message))
+                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,formatted_date,current_date))
                 self.db.commit()
             except Exception as e:
                 print(e)
                 print("Fail save to db")
             else:
                 print("Succesfully save to database ")
+
+
     
     def send_message(self,tegangan_listrik,topic,status):
         if(int(tegangan_listrik) < self.voltage_indicator):
