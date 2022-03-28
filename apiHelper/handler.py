@@ -20,9 +20,14 @@ dispatcher = updater.dispatcher
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
                     level=logging.INFO) 
  
-dicto = {}
 def start(update: Update, context: CallbackContext): 
+   dicto = {}
 
+   chat_id = update.message.chat_id
+   first_name = update.message.chat.first_name
+   last_name = update.message.chat.last_name
+   username = update.message.chat.username
+   print("chat_id : {} and firstname : {} lastname : {}  username {}". format(chat_id, first_name, last_name , username))
 
 
    dicto.update({update.message.from_user.first_name:update.message.from_user.id})
@@ -33,10 +38,11 @@ def start(update: Update, context: CallbackContext):
                     update_status(chat_id=dicto[key])
                     print("There is duplicate value when looping and insert to DB,if this prompt appears that's mean the script run sucsessfully")
                 else:
-                    print("sucsess")
+                    print("Sucsess save to db")
                     insertDb(name=key,chat_id=dicto[key])
             except Exception as e:
                 print(e)
+   print(dicto)
 
 def select_other():
     name_list = []
@@ -85,6 +91,8 @@ def callback_status(update: Update, context: CallbackContext):
     if (status == "kicked"):
         user_block(chat_id=chat_id)
 
+  
+
 
 def insertDb(name,chat_id):
     table_name = 'teleusers'
@@ -124,8 +132,8 @@ def user_block(chat_id):
 
         mydb.execute("DELETE FROM " + table_name + " WHERE chat_id=" + str(chat_id))
         
-        mydb.execute('UPDATE ' + table_name_2 + " SET status=" + str(0) + " WHERE chat_id=" + str(chat_id) )
-        mydb.execute('UPDATE ' + table_name_2 + " SET disable=" + str(1) + " WHERE chat_id=" + str(chat_id) )
+        mydb.execute('UPDATE ' + table_name_2 + " SET status=" + str(2) + " WHERE chat_id=" + str(chat_id) )
+        mydb.execute('UPDATE ' + table_name_2 + " SET disable=" + str(2) + " WHERE chat_id=" + str(chat_id) )
 
         db.commit()
 
@@ -172,7 +180,6 @@ def select():
 
 
 def update_status(chat_id): 
-    print("TESSSS")
     table_name_2 = "user_teles"
 
     try:
@@ -199,6 +206,6 @@ start_handler = CommandHandler('start', start)
 chat = ChatMemberHandler(callback=callback_status,pass_user_data=True) 
 dispatcher.add_handler(chat) 
 dispatcher.add_handler(start_handler)
- 
 updater.start_polling()
+
 

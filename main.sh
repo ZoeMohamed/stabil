@@ -8,6 +8,10 @@ python3 /home/zoe/python-notification/Batam/charger_aki_ac.py &
 python3 /home/zoe/python-notification/Batam/power_meter.py &
 
 
+python3 /home/zoe/python-notification/apiHelper/handler.py &
+
+
+
 python3 /home/zoe/python-notification/Gresik/ac_aki.py &
 python3 /home/zoe/python-notification/Gresik/ac_growatt.py &
 python3 /home/zoe/python-notification/Gresik/ais.py &

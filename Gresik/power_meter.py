@@ -115,7 +115,7 @@ class Power_meter():
         self.insertDb(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date)
 
         # # Send to telegram
-        self.send_message(volt_pln,topic,self.tool_status)
+        # self.send_message(volt_pln,topic,self.tool_status)
 
 
     def insertDb(self,topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date):

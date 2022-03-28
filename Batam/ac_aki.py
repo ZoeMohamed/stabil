@@ -121,7 +121,7 @@ class Ac_aki():
             self.insertDb(topic,tegangan_listrik,power,convertedDict)
 
             # # Send to telegram
-            self.send_message(tegangan_listrik,topic,self.tool_status)
+            # self.send_message(tegangan_listrik,topic,self.tool_status)
 
 
     def insertDb(self,topic,tegangan_listrik,power,full_message):

@@ -128,7 +128,7 @@ class Server():
             self.insertDb(topic,convertedDict,tegangan_listrik,formatted_date,current_date)
 
             # # Send to telegram
-            self.send_message(tegangan_listrik,topic,self.tool_status)
+            # self.send_message(tegangan_listrik,topic,self.tool_status)
 
    
     def insertDb(self,topic,full_message,tegangan_listrik,formatted_date,current_date):
@@ -145,6 +145,8 @@ class Server():
             except Exception as e:
                 print(e)
                 print("Fail save to db")
+                self.Messagereceived = True
+
             else:
                 print("Succesfully save to database ")
     
