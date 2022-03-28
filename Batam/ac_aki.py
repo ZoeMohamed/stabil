@@ -31,7 +31,7 @@ class Ac_aki():
             self.password = os.getenv('MQTT_PASSWORD')
             self.connected = False
             self.Messagereceived = False
-            self.voltage_indicator = 250
+            self.voltage_indicator = 200
             self.token = os.getenv('TELEGRAM_API_TOKEN')
 
             try:

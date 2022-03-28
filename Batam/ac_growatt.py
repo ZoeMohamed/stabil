@@ -129,7 +129,7 @@ class Ac_Growatt():
             print("Topic On " + topic)
 
             # # Insert to Db after receive message
-            self.insertDb(topic,convertedDict,tegangan_listrik,temperature,humidity,power,formatted_date,current_date)
+            # self.insertDb(topic,convertedDict,tegangan_listrik,temperature,humidity,power,formatted_date,current_date)
 
             # # Send to telegram
             self.send_message(tegangan_listrik,topic,self.tool_status)

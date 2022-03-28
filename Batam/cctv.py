@@ -1,19 +1,13 @@
-from operator import truediv
-from sqlite3 import connect
+from datetime import datetime
 import time
 from dotenv import load_dotenv
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
 import json
-from simplejson import load
-import telebot
-import telegram_send
-from telethon.sync import TelegramClient
-from telethon.tl.types import InputPeerUser, InputPeerChannel
-from telethon import TelegramClient, sync, events
 import os
 import datetime
+import telegram
 
 # Load Env Key and Value
 load_dotenv()
@@ -27,13 +21,14 @@ class Cctv():
             self.status = "tele/batam/cctv/LWT"
             self.tool_status = ""
             self.table_name = "cctv_batams"
-            self.client_id = f'python-mqtt-cctv_batam{random.randint(0, 1000)}'
+            self.client_id = f'python-mqtt-cctv_batams{random.randint(0, 1000)}'
             self.username = os.getenv('MQTT_USERNAME')
             self.password = os.getenv('MQTT_PASSWORD')
             self.connected = False
             self.Messagereceived = False
-            self.voltage_indicator = 250
+            self.voltage_indicator = 290
             self.token = os.getenv('TELEGRAM_API_TOKEN')
+            self.bot = telegram.Bot(token=self.token)
 
             try:
                 self.db = mysql.connector.connect(
@@ -41,7 +36,7 @@ class Cctv():
                     user=os.getenv('MYSQL_USER'),
                     password=os.getenv('MYSQL_PASSWORD'),
                     database=os.getenv('MYSQL_DATABASE')
-            
+
                 )
                 self.mydb = self.db.cursor()
             except:
@@ -54,22 +49,19 @@ class Cctv():
                 user=os.getenv('MYSQL_USER'),
                 password=os.getenv('MYSQL_PASSWORD'),
                 database=os.getenv('MYSQL_DATABASE')
-            
+
                 )
                 self.mydb = self.db.cursor()
-            
 
 
-          
 
-  
     def run(self):
         try:
             client = mqttclient.Client(client_id=self.client_id)
             client.username_pw_set(self.username, self.password)
             client.connect(self.broker_url, self.broker_port, 15)
             client.on_connect = self.on_connect
-            client.subscribe([(self.topic,0),(self.status,0)], qos=1) 
+            client.subscribe([(self.topic,0),(self.status,0)], qos=1)
             client.on_message = self.on_message
             client.loop_start()
 
@@ -95,7 +87,6 @@ class Cctv():
 
 
 
-  
     def on_message(self,client,userdata,message):
 
 
@@ -127,45 +118,57 @@ class Cctv():
             print("Topic On " + topic)
 
             # # Insert to Db after receive message
-            self.insertDb(topic,convertedDict,tegangan_listrik,formatted_date,current_date)
+            # self.insertDb(topic,convertedDict,tegangan_listrik,formatted_date,current_date)
 
             # # Send to telegram
-            # self.send_message(tegangan_listrik,topic,self.tool_status)
+            self.send_message(tegangan_listrik,topic,self.tool_status)
 
-   
-    def insertDb(self,topic,full_message,tegangan_listrik,formatted_date,current_date):
+
+    def insertDb(self,topic,full_message,tegangan_listrik,temperature,humidity,power,formatted_date,current_date):
         full_message = str(full_message)
         print(full_message)
-        try:
-            self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,formatted_date,current_date))
-        except Exception as e:
-            print(e)
-            print("tes")
+
         if(int(tegangan_listrik) < self.voltage_indicator):
             try:
-                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,formatted_date,current_date))
+                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,temperature,humidity,power,formatted_date,current_date))
                 self.db.commit()
             except Exception as e:
                 print(e)
-                print("Fail save to db")
                 self.Messagereceived = True
-
+                print("Fail save to db")
             else:
                 print("Succesfully save to database ")
-    
+
     def send_message(self,tegangan_listrik,topic,status):
         if(int(tegangan_listrik) < self.voltage_indicator):
             try:
-                telegram_send.send(messages=["Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik)])
+
+                for chat_id in self.check_status():
+                    self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))      
+
+
             except Exception as e:
                 print(e)
                 print("There is error when sendding a message")
                 self.Messagereceived = True
 
-      
+    
+
+    def check_status(self):
+        list_of_chatid = []
+        self.mydb.execute('SELECT chat_id FROM ' + "user_teles " + ' WHERE status=' + str(1))
+        results = self.mydb.fetchall()
+        for row in results:
+            print(row)
+            list_of_chatid.append("".join(row))
+
+        print(list(set(list_of_chatid)))
+
+        return list(set(list_of_chatid))
 
 
 
 
-tes  = Cctv()
-tes.run()
+cctv_batams = Cctv()
+cctv_batams.run()
+

@@ -21,28 +21,30 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO) 
  
 def start(update: Update, context: CallbackContext): 
-   dicto = {}
+   dict_of_users = {}
 
    chat_id = update.message.chat_id
    first_name = update.message.chat.first_name
    last_name = update.message.chat.last_name
    username = update.message.chat.username
+
+   
    print("chat_id : {} and firstname : {} lastname : {}  username {}". format(chat_id, first_name, last_name , username))
 
 
-   dicto.update({update.message.from_user.first_name:update.message.from_user.id})
+   dict_of_users.update({update.message.from_user.first_name:update.message.from_user.id})
 
-   for key in dicto:
+   for key in dict_of_users:
             try:
                 if key in select() or key in select_other():
-                    update_status(chat_id=dicto[key])
+                    update_status(chat_id=dict_of_users[key])
                     print("There is duplicate value when looping and insert to DB,if this prompt appears that's mean the script run sucsessfully")
                 else:
                     print("Sucsess save to db")
-                    insertDb(name=key,chat_id=dicto[key])
+                    insertDb(name=key,chat_id=dict_of_users[key])
             except Exception as e:
                 print(e)
-   print(dicto)
+   print(dict_of_users)
 
 def select_other():
     name_list = []
@@ -207,5 +209,7 @@ chat = ChatMemberHandler(callback=callback_status,pass_user_data=True)
 dispatcher.add_handler(chat) 
 dispatcher.add_handler(start_handler)
 updater.start_polling()
+
+
 
 
