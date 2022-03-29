@@ -135,7 +135,6 @@ def user_block(chat_id):
         mydb.execute("DELETE FROM " + table_name + " WHERE chat_id=" + str(chat_id))
         
         mydb.execute('UPDATE ' + table_name_2 + " SET status=" + str(2) + " WHERE chat_id=" + str(chat_id) )
-        mydb.execute('UPDATE ' + table_name_2 + " SET disable=" + str(2) + " WHERE chat_id=" + str(chat_id) )
 
         db.commit()
 
@@ -194,7 +193,6 @@ def update_status(chat_id):
         mydb = db.cursor()
 
         mydb.execute('UPDATE ' + table_name_2 + " SET status=" + str(0) + " WHERE chat_id=" + str(chat_id) )    
-        mydb.execute('UPDATE ' + table_name_2 + " SET disable=" + str(0) + " WHERE chat_id=" + str(chat_id) )    
         db.commit()
 
 
