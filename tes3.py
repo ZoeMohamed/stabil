@@ -1,10 +1,27 @@
-from datetime import datetime,timedelta
+from math import ceil
+from datetime import datetime, timedelta
+import time
 
-now = datetime.now()
-mydate = datetime(2012,9,28,10,55)
-mystart = now.replace(hour=10, minute=55, second=0)
-myend = datetime.now() + timedelta(minutes=2)
+from math import ceil
+from datetime import datetime, timedelta
 
-print(myend)
-if mystart <= mydate < myend:
-    print("dumb")
+i = 0
+is_printed = False
+
+
+def to_second(minute):
+    return minute * 60
+
+
+while True:
+    ts = datetime.now()
+    ts = ts.replace(second=0, microsecond=0) + \
+        timedelta(seconds=ceil(ts.second/to_second(2))*to_second(2))
+
+    xs = datetime.now()
+    xs = xs.replace(second=0, microsecond=0)
+
+    if(xs.minute == ts.minute):
+        time.sleep(1)
+        print(xs)
+        print(ts)
