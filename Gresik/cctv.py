@@ -179,6 +179,6 @@ class Cctv():
 
 
 
-cctv_batams = Cctv()
-cctv_batams.run()
+Cctv_gresik = Cctv()
+Cctv_gresik.run()
 

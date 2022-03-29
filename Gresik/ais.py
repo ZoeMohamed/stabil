@@ -179,6 +179,6 @@ class Ais():
 
 
 
-ais_batam = Ais()
-ais_batam.run()
+Ais_gresik = Ais()
+Ais_gresik.run()
 

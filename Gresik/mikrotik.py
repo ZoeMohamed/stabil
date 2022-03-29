@@ -11,7 +11,7 @@ import telegram
 
 # Load Env Key and Value
 load_dotenv()
-class Cctv():
+class Mikrotik():
     # Inisialisasi Variabel
     def __init__(self):
             self.broker_url = os.getenv('MQTT_HOST')
@@ -179,6 +179,6 @@ class Cctv():
 
 
 
-cctv_batams = Cctv()
-cctv_batams.run()
+Mikrotik_gresik = Mikrotik()
+Mikrotik_gresik.run()
 

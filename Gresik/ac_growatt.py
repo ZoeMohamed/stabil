@@ -190,6 +190,6 @@ class Ac_Growatt():
 
 
 
-ac_growatt_batam = Ac_Growatt()
-ac_growatt_batam.run()
+Ac_Growatt_gresik = Ac_Growatt()
+Ac_Growatt_gresik.run()
 

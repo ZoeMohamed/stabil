@@ -171,6 +171,5 @@ class Power_meter():
 
 
 
-
-tes  = Power_meter()
-tes.run()
+Power_meter_gresik  = Power_meter()
+Power_meter_gresik.run()

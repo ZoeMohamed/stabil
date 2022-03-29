@@ -179,6 +179,6 @@ class Server():
 
 
 
-Server_batam = Server()
-Server_batam.run()
+Server_gresik = Server()
+Server_gresik.run()
 

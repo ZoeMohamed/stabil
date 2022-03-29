@@ -172,5 +172,5 @@ class Power_meter():
 
 
 
-tes  = Power_meter()
-tes.run()
+power_meter_batam = Power_meter()
+power_meter_batam .run()
