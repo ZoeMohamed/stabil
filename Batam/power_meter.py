@@ -145,16 +145,26 @@ class Power_meter():
     
 
     def check_status(self):
-        list_of_chatid = []
-        self.mydb.execute('SELECT chat_id FROM ' + "user_teles " + ' WHERE status=' + str(1))
-        results = self.mydb.fetchall()
-        for row in results:
-            print(row)
-            list_of_chatid.append("".join(row))
 
-        print(list(set(list_of_chatid)))
+            db= mysql.connector.connect(
+                        host=os.getenv('MYSQL_HOST'),
+                        user=os.getenv('MYSQL_USER'),
+                        password=os.getenv('MYSQL_PASSWORD'),
+                        database=os.getenv('MYSQL_DATABASE')
 
-        return list(set(list_of_chatid))
+                    )
+            mydb = db.cursor()
+
+            list_of_chatid = []
+            mydb.execute('SELECT chat_id FROM ' + "user_teles " + ' WHERE status=' + str(1))
+            results = mydb.fetchall()
+            for row in results:
+                print(row)
+                list_of_chatid.append("".join(row))
+            
+            print(list(set(list_of_chatid)))
+
+            return list(set(list_of_chatid))
 
 
       
