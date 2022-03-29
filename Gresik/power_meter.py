@@ -1,17 +1,8 @@
-from operator import truediv
-from sqlite3 import connect
 import time
 from dotenv import load_dotenv
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
-import json
-from simplejson import load
-import telebot
-import telegram_send
-from telethon.sync import TelegramClient
-from telethon.tl.types import InputPeerUser, InputPeerChannel
-from telethon import TelegramClient, sync, events
 import os
 import datetime
 
@@ -112,10 +103,10 @@ class Power_meter():
 
 
         # # Insert to Db after receive message
-        self.insertDb(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date)
+        # self.insertDb(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date)
 
         # # Send to telegram
-        # self.send_message(volt_pln,topic,self.tool_status)
+        self.send_message(volt_pln,topic,self.tool_status)
 
 
     def insertDb(self,topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date):
@@ -133,17 +124,38 @@ class Power_meter():
             except Exception as e:
                 print(e)
                 print("Fail save to db")
+                self.Messagereceived = True
+
             else:
                 print("Succesfully save to database ")
     
     def send_message(self,tegangan_listrik,topic,status):
-        if(float(tegangan_listrik) < self.voltage_indicator):
+        if(int(tegangan_listrik) < self.voltage_indicator):
             try:
-                telegram_send.send(messages=["Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik)])
+
+                for chat_id in self.check_status():
+                    self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))      
+
+
             except Exception as e:
                 print(e)
                 print("There is error when sendding a message")
                 self.Messagereceived = True
+
+    
+
+    def check_status(self):
+        list_of_chatid = []
+        self.mydb.execute('SELECT chat_id FROM ' + "user_teles " + ' WHERE status=' + str(1))
+        results = self.mydb.fetchall()
+        for row in results:
+            print(row)
+            list_of_chatid.append("".join(row))
+
+        print(list(set(list_of_chatid)))
+
+        return list(set(list_of_chatid))
+
 
       
 
