@@ -72,6 +72,17 @@ class Server():
                 time.sleep(0.1)
 
             while self.Messagereceived != True:
+                time_stamp = datetime.datetime.now()
+                time_stamp = int(str(time_stamp).split(":")[1])
+                running = True
+                while running:
+                    minute = int(str(datetime.datetime.now()).split(":")[1])
+                    if(minute < time_stamp + 1):
+                        # do something
+                        pass
+                    else:
+                        print("Run function every 20 Mins")
+                        running = False
                 time.sleep(0.1)
 
             client.loop_stop()
@@ -119,20 +130,6 @@ class Server():
     def insertDb(self, topic, full_message, tegangan_listrik, formatted_date, current_date):
         full_message = str(full_message)
         print(full_message)
-
-        while True:
-            ts = datetime.datetime.now()
-            ts = ts.replace(second=0, microsecond=0) + \
-                timedelta(seconds=ceil(ts.second/self.to_second(1))
-                          * self.to_second(1))
-
-            xs = datetime.datetime.now()
-            xs = xs.replace(second=0, microsecond=0)
-
-            if(xs.minute == ts.minute):
-                time.sleep(1)
-                print(xs)
-                print(ts)
 
 
 Server_gresik = Server()
