@@ -11,9 +11,9 @@ running = True
 while running:
     minute = int(str(datetime.now()).split(":")[1])
     if(minute < time_stamp + 1):
-        print("belum kelar")
+        print("Voltage track")
         print(datetime.now())
 
     else:
-        print("udah kelar")   
+        print("Run eve 20 Minutes")   
         running = False
