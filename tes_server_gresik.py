@@ -35,7 +35,7 @@ class Server():
         self.voltage_indicator = 209
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
-        self.volt = 0
+        self.volt = None
 
         try:
             self.db = mysql.connector.connect(
@@ -77,19 +77,30 @@ class Server():
                 time.sleep(0.1)
 
             while self.Messagereceived != True:
-                time_stamp = datetime.datetime.now()
-                time_stamp = int(str(time_stamp).split(":")[1])
-                running = True
-                while running:
-                    minute = int(str(datetime.datetime.now()).split(":")[1])
-                    if(minute < time_stamp + 1 and self.volt is not None):
-                         self.mydb.execute(f"INSERT INTO {self.table_name} (volt) VALUES (%s)",(self.volt))
-                         self.db.commit()
+
+                now = datetime.datetime.now()
+                sekarang=now.hour*3600+now.minute
+                time_stamp = sekarang
+                while True:
+                    now = datetime.datetime.now()
+                    sekarang=now.hour*3600+now.minute
+                    time.sleep(1)
+
+                    if (sekarang - time_stamp ) < 1 and self.volt is not None:
+                        current_date = datetime.datetime.now()
+                        formatted_date = datetime.date.strftime(current_date, "%m/%d/%Y/%H:%M:%S")
+                        self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",("tes","tes",self.volt,formatted_date,current_date))
+                        self.db.commit()
+                        time_stamp = sekarang
+
+                    elif(sekarang - time_stamp) >= 1:
+                        print("mantap")
+                        time_stamp = sekarang
                         
-                    elif (minute > time_stamp + 1):
-                        print("Run function every 20 Mins")
-                        running = False
-                time.sleep(0.1)
+
+
+
+
 
             client.loop_stop()
         except Exception as e:
@@ -122,38 +133,14 @@ class Server():
             formatted_date = datetime.date.strftime(
                 current_date, "%m/%d/%Y/%H:%M:%S")
 
-            # print(convertedDict)
 
-            # print(formatted_date)
+            print(convertedDict)
 
-            if(self.volt < 215):
+            if(tegangan_listrik < 210):
                 self.volt = tegangan_listrik    
-            # # Insert to Db after receive message
-            # self.insertDb(topic, convertedDict, tegangan_listrik,
-            #               formatted_date, current_date)
-
-    def to_second(self, minute):
-        return minute * 60
-
-    def insertDb(self, topic, full_message, tegangan_listrik, formatted_date, current_date):
-        full_message = str(full_message)
-        print(full_message)
-
 
 Server_gresik = Server()
 Server_gresik.run()
 
 
-def loop_b():
-    while True:
-        ts = datetime.datetime.now()
-        ts = ts.replace(second=0, microsecond=0) + \
-            timedelta(seconds=ceil(ts.second/60)*60)
 
-        xs = datetime.datetime.now()
-        xs = xs.replace(second=0, microsecond=0)
-
-        if(xs.minute == ts.minute):
-            time.sleep(1)
-            print(xs)
-            print(ts)

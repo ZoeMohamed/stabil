@@ -21,16 +21,18 @@
 from datetime import datetime
 
 now = datetime.now()
-sekarang=now.hour*3600+now.minute * 60 + now.second
+sekarang=now.hour*3600+now.minute
 time_stamp = sekarang
 import time
 while True:
     now = datetime.now()
-    sekarang=now.hour*3600+now.minute * 60 + now.second
+    sekarang=now.hour*3600+now.minute
     time.sleep(1)
-    if (sekarang - time_stamp ) > 1:
-        time_stamp = sekarang
-        print(time_stamp)
+    print(now)
+    print(sekarang)
+    # if (sekarang - time_stamp ) > 1:
+    #     time_stamp = sekarang
+    #     print(time_stamp)
 
 
 
