@@ -1,6 +1,6 @@
-from queue import Empty
 import time
 from dotenv import load_dotenv
+from numpy import empty
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
@@ -35,7 +35,13 @@ class Server():
         self.voltage_indicator = 209
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
-        self.volt = None
+        self.low_volt = None
+        self.time_trigger = 20
+        self.low_message = None
+        self.low_topic = None
+        self.arr_normal_volt = []
+        self.arr_normal_message = []
+        self.arr_normal_topic = []
 
         try:
             self.db = mysql.connector.connect(
@@ -46,7 +52,8 @@ class Server():
 
             )
             self.mydb = self.db.cursor()
-        except:
+        except Exception as e:
+            print(e)
             self.Messagereceived = True
             print("Error when connecting to Database")
             print("The Loop Stop")
@@ -60,8 +67,6 @@ class Server():
             )
             self.mydb = self.db.cursor()
     # def insert_volt(self):
-
-
 
     def run(self):
         try:
@@ -79,28 +84,37 @@ class Server():
             while self.Messagereceived != True:
 
                 now = datetime.datetime.now()
-                sekarang=now.hour*3600+now.minute
+                sekarang = now.hour*3600+now.minute
                 time_stamp = sekarang
                 while True:
                     now = datetime.datetime.now()
-                    sekarang=now.hour*3600+now.minute
+                    sekarang = now.hour*3600+now.minute
                     time.sleep(1)
 
-                    if (sekarang - time_stamp ) < 1 and self.volt is not None:
+                    if (sekarang - time_stamp) < self.time_trigger and self.low_volt is not None:
+                        print("kurang dari 20 Mins")
+                        print(now)
+                        print(sekarang)
+                        print(time_stamp)
                         current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(current_date, "%m/%d/%Y/%H:%M:%S")
-                        self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",("tes","tes",self.volt,formatted_date,current_date))
+                        formatted_date = datetime.date.strftime(
+                            current_date, "%m/%d/%Y/%H:%M:%S")
+                        self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
+                            self.low_topic, str(self.low_message), self.low_volt, formatted_date, current_date))
+                        self.db.commit()
+
+                    elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_topic) != 0 and len(self.arr_normal_message) != 0 and len(self.arr_normal_volt) != 0:
+                        print("lebih dari 20 Mins")
+                        print(now)
+                        print(sekarang)
+                        print(time_stamp)
+                        current_date = datetime.datetime.now()
+                        formatted_date = datetime.date.strftime(
+                            current_date, "%m/%d/%Y/%H:%M:%S")
+                        self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
+                            self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], formatted_date, current_date))
                         self.db.commit()
                         time_stamp = sekarang
-
-                    elif(sekarang - time_stamp) >= 1:
-                        print("mantap")
-                        time_stamp = sekarang
-                        
-
-
-
-
 
             client.loop_stop()
         except Exception as e:
@@ -133,14 +147,18 @@ class Server():
             formatted_date = datetime.date.strftime(
                 current_date, "%m/%d/%Y/%H:%M:%S")
 
-
             print(convertedDict)
 
-            if(tegangan_listrik < 210):
-                self.volt = tegangan_listrik    
+            if(tegangan_listrik < 219):
+                self.low_volt = tegangan_listrik
+                self.low_message = convertedDict
+                self.low_topic = topic
+
+            if(tegangan_listrik > 219):
+                self.arr_normal_volt.append(tegangan_listrik)
+                self.arr_normal_message.append(convertedDict)
+                self.arr_normal_topic.append(topic)
+
 
 Server_gresik = Server()
 Server_gresik.run()
-
-
-
