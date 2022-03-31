@@ -1,6 +1,5 @@
 import time
 from dotenv import load_dotenv
-from numpy import empty
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
