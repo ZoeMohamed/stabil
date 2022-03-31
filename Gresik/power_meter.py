@@ -85,50 +85,7 @@ class Power_meter():
 
 
 
-    def on_message(self,client,userdata,message):
 
-        topic = str(message.topic)
-        date = datetime.datetime.now()
-        volt_pln = message.payload.decode('utf-8').split(",")[0]
-        arus_pln = message.payload.decode('utf-8').split(",")[1]
-        power_pln = message.payload.decode('utf-8').split(",")[2]
-        freq_pln = message.payload.decode('utf-8').split(",")[3]
-        volt_genset = message.payload.decode('utf-8').split(",")[4]
-        arus_genset = message.payload.decode('utf-8').split(",")[5]
-        power_genset = message.payload.decode('utf-8').split(",")[6]
-        freq_genset = message.payload.decode('utf-8').split(",")[7]
-        full_message = message.payload.decode('utf-8')
-        print(volt_pln)
-        print(message.payload.decode('utf-8'))
-
-
-        # # Insert to Db after receive message
-        # self.insertDb(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date)
-
-        # # Send to telegram
-        self.send_message(volt_pln,topic,self.tool_status)
-
-
-    def insertDb(self,topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date):
-        full_message = str(full_message)
-        now = datetime.datetime.now()
-        try:
-            self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date))
-        except Exception as e:
-            print(e)
-            print("tes")
-        if(float(volt_pln) < self.voltage_indicator):
-            try:
-                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date))
-                self.db.commit()
-            except Exception as e:
-                print(e)
-                print("Fail save to db")
-                self.Messagereceived = True
-
-            else:
-                print("Succesfully save to database ")
-    
     def send_message(self,tegangan_listrik,topic,status):
         if(int(tegangan_listrik) < self.voltage_indicator):
             try:

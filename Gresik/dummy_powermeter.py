@@ -1,17 +1,10 @@
 from operator import truediv
 from sqlite3 import connect
-import time
 from dotenv import load_dotenv
-import paho.mqtt.client as mqttclient
 import mysql.connector
-import random
-import json
 from simplejson import load
-import telebot
 import telegram_send
-from telethon.sync import TelegramClient
-from telethon.tl.types import InputPeerUser, InputPeerChannel
-from telethon import TelegramClient, sync, events
+
 import os
 import datetime
 
@@ -65,9 +58,9 @@ class Power_meter():
 
     def on_message(self):
         
-        dummy_message = "215.30,3.844,543.60,2.714,50.10,0.66,0.00,0.000,0.00,0.000,0.00,0.00,572,37.56,-1,1"
+        dummy_message = "210.30,3.824,543.60,2.712,50.10,0.66,0.00,0.000,0.00,0.000,0.00,0.00,572,37.56,-1,1"
 
-        topic = "batam/powermeter"
+        topic = "gresik/powermeter"
         current_date = datetime.datetime.now()
         formatted_date = datetime.date.strftime(current_date, "%m/%d/%Y/%H:%M:%S")  
         volt_pln = dummy_message.split(",")[0]

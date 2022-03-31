@@ -1,3 +1,4 @@
+from queue import Empty
 import time
 from dotenv import load_dotenv
 import paho.mqtt.client as mqttclient
@@ -34,6 +35,7 @@ class Server():
         self.voltage_indicator = 209
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
+        self.volt = 0
 
         try:
             self.db = mysql.connector.connect(
@@ -57,6 +59,9 @@ class Server():
 
             )
             self.mydb = self.db.cursor()
+    # def insert_volt(self):
+
+
 
     def run(self):
         try:
@@ -77,10 +82,11 @@ class Server():
                 running = True
                 while running:
                     minute = int(str(datetime.datetime.now()).split(":")[1])
-                    if(minute < time_stamp + 1):
-                        # do something
-                        pass
-                    else:
+                    if(minute < time_stamp + 1 and self.volt is not None):
+                         self.mydb.execute(f"INSERT INTO {self.table_name} (volt) VALUES (%s)",(self.volt))
+                         self.db.commit()
+                        
+                    elif (minute > time_stamp + 1):
                         print("Run function every 20 Mins")
                         running = False
                 time.sleep(0.1)
@@ -120,9 +126,11 @@ class Server():
 
             # print(formatted_date)
 
+            if(self.volt < 215):
+                self.volt = tegangan_listrik    
             # # Insert to Db after receive message
-            self.insertDb(topic, convertedDict, tegangan_listrik,
-                          formatted_date, current_date)
+            # self.insertDb(topic, convertedDict, tegangan_listrik,
+            #               formatted_date, current_date)
 
     def to_second(self, minute):
         return minute * 60

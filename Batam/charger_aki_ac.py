@@ -118,26 +118,25 @@ class Charger_aki_ac():
             print("Topic On " + topic)
 
             # # Insert to Db after receive message
-            # self.insertDb(topic,convertedDict,tegangan_listrik,formatted_date,current_date)
+            self.insertDb(topic,convertedDict,tegangan_listrik,formatted_date,current_date)
 
             # # Send to telegram
             self.send_message(tegangan_listrik,topic,self.tool_status)
 
 
-    def insertDb(self,topic,full_message,tegangan_listrik,temperature,humidity,power,formatted_date,current_date):
+    def insertDb(self,topic,full_message,tegangan_listrik,formatted_date,current_date):
         full_message = str(full_message)
         print(full_message)
 
-        if(int(tegangan_listrik) < self.voltage_indicator):
-            try:
-                self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,temperature,humidity,power,formatted_date,current_date))
-                self.db.commit()
-            except Exception as e:
-                print(e)
-                self.Messagereceived = True
-                print("Fail save to db")
-            else:
-                print("Succesfully save to database ")
+        try:
+            self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)",(topic,full_message,tegangan_listrik,formatted_date,current_date))
+            self.db.commit()
+        except Exception as e:
+            print(e)
+            self.Messagereceived = True
+            print("Fail save to db")
+        else:
+            print("Succesfully save to database ")
 
     def send_message(self,tegangan_listrik,topic,status):
         if(int(tegangan_listrik) < self.voltage_indicator):
