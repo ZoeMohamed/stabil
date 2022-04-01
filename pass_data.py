@@ -35,7 +35,7 @@ class Server():
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
         self.low_volt = None
-        self.time_trigger = 20
+        self.time_trigger = 10
         self.low_message = None
         self.low_topic = None
         self.arr_normal_volt = []
