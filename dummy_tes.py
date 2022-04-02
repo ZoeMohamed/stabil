@@ -1,5 +1,5 @@
 import time
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
@@ -22,11 +22,11 @@ class Server():
         self.broker_url = os.getenv('MQTT_HOST')
         self.broker_port = int(os.getenv('MQTT_PORT'))
         self.clean_session = True
-        self.topic = "tele/batam/ais/SENSOR"
-        self.status = "tele/batam/ais/LWT"
+        self.topic = "tele/gresik/ac_growatt/SENSOR"
+        self.status = "tele/gresik/ac_growatt/LWT"
         self.tool_status = ""
-        self.table_name = "aisfuruno_batams"
-        self.client_id = f'python-mqtt-server_gresiks{random.randint(0, 1000)}'
+        self.table_name = "acgrowatt_gresiks"
+        self.client_id = f'python-mqtt-ac_growatt_gresiks{random.randint(0, 1000)}'
         self.username = os.getenv('MQTT_USERNAME')
         self.password = os.getenv('MQTT_PASSWORD')
         self.connected = False
@@ -48,6 +48,8 @@ class Server():
         self.last_volt = None
         self.real_time_volt = None
         self.lowest_volt = None
+        self.topics = None
+        self.full_message = None
 
         try:
             self.db = mysql.connector.connect(
@@ -90,11 +92,13 @@ class Server():
             while self.Messagereceived != True:
 
                 now = datetime.datetime.now()
-                sekarang = now.hour*3600+now.minute
+                sekarang = now.hour*60+now.minute
                 time_stamp = sekarang
                 while True:
                     now = datetime.datetime.now()
-                    sekarang = now.hour*3600+now.minute
+                    sekarang = now.hour*60+now.minute
+                    # print(sekarang)
+                    # print(time_stamp)
                     print(sekarang - time_stamp)
                     time.sleep(1)
 
@@ -107,15 +111,15 @@ class Server():
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
-                            "tes", str("tes data "), self.lowest_volt, formatted_date, current_date))
+                            self.topics, str(self.full_message), self.lowest_volt, formatted_date, current_date))
                         self.db.commit()
                         self.lowest_volt = None
 
-                    elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_topic) != 0 and len(self.arr_normal_message) != 0 and len(self.arr_normal_volt) != 0:
+                    elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_volt) != 0:
                         print("lebih dari 20 Mins")
-                        print(now)
-                        print(sekarang)
-                        print(time_stamp)
+                        # print(now)
+                        # print(sekarang)
+                        # print(time_stamp)
                         current_date = datetime.datetime.now()
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
@@ -164,12 +168,13 @@ class Server():
             # Check Tegangan Sekarang dengan Tegangan Sebelumnya
             # Jika Nilai Pengurangan Lebih dari 100 Maka listrik tidak stabil
             if(len(self.comp_arr) == 2):
-                if(abs(self.real_time_volt - self.last_volt)) > 100:
+                if(abs(self.real_time_volt - self.last_volt)) >= 15:
                     print("Tegangan Listrik Tidak Stabil")
                     print(abs(self.last_volt - self.real_time_volt))
                     self.comp_arr.pop(0)
                     self.lowest_volt = self.comp_arr[-1]
-                    print(self.lowest_volt)
+                    self.topics = topic
+                    self.full_message = convertedDict
 
                 else:
                     # Hapus Voltage Lama Jika Pengurangan dari dua nilai tidak lebih dari 100
@@ -180,7 +185,7 @@ class Server():
                     print("Sesudah di Pop")
                     print(self.comp_arr)
 
-            if(tegangan_listrik > 220):
+            if(tegangan_listrik >= 210):
                 self.arr_normal_volt.append(tegangan_listrik)
                 self.arr_normal_message.append(convertedDict)
                 self.arr_normal_topic.append(topic)
