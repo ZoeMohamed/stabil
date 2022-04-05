@@ -36,7 +36,7 @@ class Server():
 
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 5
+        self.time_trigger = 20
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
