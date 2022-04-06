@@ -266,9 +266,9 @@ class Ac_growatt():
                         self.arr_normal_volt.pop(0)
                         self.arr_normal_message.pop(0)
                         self.arr_normal_topic.pop(0)
-                        self.arr_normal_temperature.append(0)
-                        self.arr_normal_humidity.append(0)
-                        self.arr_normal_power.append(0)
+                        self.arr_normal_temperature.pop(0)
+                        self.arr_normal_humidity.pop(0)
+                        self.arr_normal_power.pop(0)
 
                     print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
