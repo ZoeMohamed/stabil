@@ -231,9 +231,10 @@ class Ac_aki():
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
 
-                    self.arr_normal_volt.pop(0)
-                    self.arr_normal_message.pop(0)
-                    self.arr_normal_topic.pop(0)
+                    if(len(self.arr_normal_volt) == 2 and len(self.arr_normal_message) == 2 and len(self.arr_normal_topic) == 2):
+                        self.arr_normal_volt.pop(0)
+                        self.arr_normal_message.pop(0)
+                        self.arr_normal_topic.pop(0)
 
                     print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 

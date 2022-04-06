@@ -35,7 +35,7 @@ class Ac_growatt():
         self.bot = telegram.Bot(token=self.token)
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 20
+        self.time_trigger = 1
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -258,10 +258,17 @@ class Ac_growatt():
                     self.arr_normal_volt.append(tegangan_listrik)
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
+                    self.arr_normal_temperature.append(temperature)
+                    self.arr_normal_humidity.append(humidity)
+                    self.arr_normal_power.append(power)
 
-                    self.arr_normal_volt.pop(0)
-                    self.arr_normal_message.pop(0)
-                    self.arr_normal_topic.pop(0)
+                    if(len(self.arr_normal_volt) == 2 and len(self.arr_normal_message) == 2 and len(self.arr_normal_topic) == 2 and len(self.arr_normal_temperature) == 2 and len(self.arr_normal_humidity) == 2 and len(self.arr_normal_humidity) == 2 and len(self.arr_normal_power) == 2):
+                        self.arr_normal_volt.pop(0)
+                        self.arr_normal_message.pop(0)
+                        self.arr_normal_topic.pop(0)
+                        self.arr_normal_temperature.append(0)
+                        self.arr_normal_humidity.append(0)
+                        self.arr_normal_power.append(0)
 
                     print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
@@ -280,6 +287,10 @@ class Ac_growatt():
                 self.arr_normal_volt.append(tegangan_listrik)
                 self.arr_normal_message.append(convertedDict)
                 self.arr_normal_topic.append(topic)
+                self.arr_normal_humidity.append(humidity)
+                self.arr_normal_power.append(power)
+                self.arr_normal_temperature.append(temperature)
+
                 print("KALO LEN NYA 1")
                 print(self.arr_normal_volt)
                 print(self.arr_normal_message)

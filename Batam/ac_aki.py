@@ -1,5 +1,6 @@
 import time
 from dotenv import load_dotenv, set_key
+from numpy import empty
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
@@ -35,10 +36,11 @@ class Ac_aki():
         self.bot = telegram.Bot(token=self.token)
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 20
+        self.time_trigger = 1
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
+
         self.comp_arr = []
         self.last_volt = None
         self.real_time_volt = None
@@ -84,7 +86,6 @@ class Ac_aki():
                 time.sleep(0.1)
 
             while self.Messagereceived != True:
-
                 now = datetime.datetime.now()
                 sekarang = now.hour*60+now.minute
                 time_stamp = sekarang
@@ -112,7 +113,7 @@ class Ac_aki():
 
                         self.lowest_volt = None
 
-                    elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_volt) != 0:
+                    elif(sekarang - time_stamp) >= self.time_trigger:
                         print("lebih dari 20 Mins")
 
                         current_date = datetime.datetime.now()
@@ -121,6 +122,7 @@ class Ac_aki():
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
                             self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], formatted_date, current_date))
                         self.db.commit()
+
                         self.arr_normal_message = []
                         self.arr_normal_topic = []
                         self.arr_normal_volt = []
@@ -214,6 +216,7 @@ class Ac_aki():
             print(convertedDict)
 
             self.comp_arr.append(tegangan_listrik)
+
             self.last_volt = self.comp_arr[0]
             self.real_time_volt = self.comp_arr[-1]
 
@@ -231,9 +234,10 @@ class Ac_aki():
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
 
-                    self.arr_normal_volt.pop(0)
-                    self.arr_normal_message.pop(0)
-                    self.arr_normal_topic.pop(0)
+                    if(len(self.arr_normal_volt) == 2 and len(self.arr_normal_message) == 2 and len(self.arr_normal_topic) == 2):
+                        self.arr_normal_volt.pop(0)
+                        self.arr_normal_message.pop(0)
+                        self.arr_normal_topic.pop(0)
 
                     print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
@@ -249,6 +253,7 @@ class Ac_aki():
                     print(self.comp_arr)
 
             elif(len(self.comp_arr) == 1):
+                print("MANTAP")
                 self.arr_normal_volt.append(tegangan_listrik)
                 self.arr_normal_message.append(convertedDict)
                 self.arr_normal_topic.append(topic)
