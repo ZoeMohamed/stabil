@@ -263,14 +263,16 @@ class Ac_growatt():
                     self.arr_normal_volt.append(tegangan_listrik)
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
-                    
-                    print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
+                    self.arr_normal_volt.pop(0)
+                    self.arr_normal_message.pop(0)
+                    self.arr_normal_topic.pop(0)
+
+                    print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
                     print(self.arr_normal_volt)
                     print(self.arr_normal_message)
                     print(self.arr_normal_topic)
-
 
                     print("Tegangan Listrik Stabil")
                     print("Sebelum di Pop")

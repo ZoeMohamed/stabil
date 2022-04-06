@@ -102,7 +102,8 @@ class Server():
                         current_date = datetime.datetime.now()
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
-                        self.send_message(self.lowest_volt,self.topic,self.tool_status)
+                        self.send_message(self.lowest_volt,
+                                          self.topic, self.tool_status)
 
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
                             self.topics, str(self.full_message), self.lowest_volt, formatted_date, current_date))
@@ -228,6 +229,10 @@ class Server():
                     self.arr_normal_volt.append(tegangan_listrik)
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
+
+                    self.arr_normal_volt.pop(0)
+                    self.arr_normal_message.pop(0)
+                    self.arr_normal_topic.pop(0)
 
                     print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
