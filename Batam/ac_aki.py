@@ -36,7 +36,7 @@ class Ac_aki():
         self.bot = telegram.Bot(token=self.token)
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 1
+        self.time_trigger = 20
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
