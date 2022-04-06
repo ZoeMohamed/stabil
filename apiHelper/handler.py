@@ -203,9 +203,14 @@ def update_status(chat_id):
     
  
 start_handler = CommandHandler('start', start) 
+
 chat = ChatMemberHandler(callback=callback_status,pass_user_data=True) 
+
 dispatcher.add_handler(chat) 
+
+
 dispatcher.add_handler(start_handler)
+
 updater.start_polling()
 
 

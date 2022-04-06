@@ -104,7 +104,7 @@ class Cctv():
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
 
-                        self.send_message(self.lowest_volt,self.topic,self.status)
+                        self.send_message(self.lowest_volt,self.topic,self.tool_status)
 
 
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (

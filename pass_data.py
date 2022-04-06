@@ -1,5 +1,5 @@
 import time
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
@@ -16,38 +16,36 @@ import time
 load_dotenv()
 
 
-class Server():
+class Ac_aki():
     # Inisialisasi Variabel
     def __init__(self):
         self.broker_url = os.getenv('MQTT_HOST')
         self.broker_port = int(os.getenv('MQTT_PORT'))
         self.clean_session = True
-        self.topic = "tele/batam/ais/SENSOR"
-        self.status = "tele/batam/ais/LWT"
+        self.topic = "tele/batam/ac_aki/SENSOR"
+        self.status = "tes2"
         self.tool_status = ""
-        self.table_name = "aisfuruno_batams"
-        self.client_id = f'python-mqtt-server_gresiks{random.randint(0, 1000)}'
+        self.table_name = "acaki_batams"
+        self.client_id = f'python-mqtt-ac_growatt_gresiks{random.randint(0, 1000)}'
         self.username = os.getenv('MQTT_USERNAME')
         self.password = os.getenv('MQTT_PASSWORD')
         self.connected = False
         self.Messagereceived = False
-        self.voltage_indicator = 209
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
-        self.low_volt = None
+
+
+        # Inisialisasi Perubahan Voltage
         self.time_trigger = 20
-        self.low_message = None
-        self.low_topic = None
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
-        self.volt_trigger = 200
-
-        # Inisialisasi Perubahan Voltage
         self.comp_arr = []
         self.last_volt = None
         self.real_time_volt = None
         self.lowest_volt = None
+        self.topics = None
+        self.full_message = None
 
         try:
             self.db = mysql.connector.connect(
@@ -72,7 +70,6 @@ class Server():
 
             )
             self.mydb = self.db.cursor()
-    # def insert_volt(self):
 
     def run(self):
         try:
@@ -80,7 +77,7 @@ class Server():
             client.username_pw_set(self.username, self.password)
             client.connect(self.broker_url, self.broker_port, 15)
             client.on_connect = self.on_connect
-            client.subscribe([(self.topic, 0), (self.status, 0)], qos=1)
+            client.subscribe(self.status)
             client.on_message = self.on_message
             client.loop_start()
 
@@ -88,42 +85,7 @@ class Server():
                 time.sleep(0.1)
 
             while self.Messagereceived != True:
-
-                now = datetime.datetime.now()
-                sekarang = now.hour*3600+now.minute
-                time_stamp = sekarang
-                while True:
-                    now = datetime.datetime.now()
-                    sekarang = now.hour*3600+now.minute
-                    print(sekarang - time_stamp)
-                    time.sleep(1)
-
-                    if self.lowest_volt is not None:
-                        print("kurang dari 20 Mins")
-                        print(now)
-                        print(sekarang)
-                        print(time_stamp)
-                        current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(
-                            current_date, "%m/%d/%Y/%H:%M:%S")
-                        self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
-                            "tes", str("tes data "), self.lowest_volt, formatted_date, current_date))
-                        self.db.commit()
-                        self.lowest_volt = None
-
-                    elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_topic) != 0 and len(self.arr_normal_message) != 0 and len(self.arr_normal_volt) != 0:
-                        print("lebih dari 20 Mins")
-                        print(now)
-                        print(sekarang)
-                        print(time_stamp)
-                        current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(
-                            current_date, "%m/%d/%Y/%H:%M:%S")
-                        self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
-                            self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], formatted_date, current_date))
-                        self.db.commit()
-                        time_stamp = sekarang
-
+                time.sleep(0.1)
             client.loop_stop()
         except Exception as e:
             print(e)
@@ -135,56 +97,32 @@ class Server():
         else:
             print("Client is not connected")
 
+
+    def send_message(self,tegangan_listrik,topic,status):
+            print("Masuk ke send message")
+            try:
+
+                for chat_id in self.check_status():
+                    self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))      
+
+
+            except Exception as e:
+                print(e)
+                print("There is error when sendding a message")
+                self.Messagereceived = True
+
+    
+
+
+
+
+
     def on_message(self, client, userdata, message):
 
-        if(message.payload.decode('utf-8') == "Online" or message.payload.decode('utf-8') == "Offline"):
-            print("Status : " + message.payload.decode('utf-8'))
-            self.tool_status = message.payload.decode('utf-8')
-        else:
+       print(message)
 
-            # # Ambil nilai topic
-            topic = str(message.topic)
-
-            # # Convert string to dict (data dari broker)
-            convertedDict = json.loads(message.payload.decode('utf-8'))
-
-            # # Ambil nilai tegangan_listrik
-            tegangan_listrik = int(convertedDict['ENERGY']['Voltage'])
-
-            current_date = datetime.datetime.now()
-            formatted_date = datetime.date.strftime(
-                current_date, "%m/%d/%Y/%H:%M:%S")
-            print(convertedDict)
-
-            # Tambahkan Nilai tegangan listrik baru kedalam Array
-            self.comp_arr.append(tegangan_listrik)
-            # Inisialisasi
-            self.last_volt = self.comp_arr[0]
-            self.real_time_volt = self.comp_arr[-1]
-            # Check Tegangan Sekarang dengan Tegangan Sebelumnya
-            # Jika Nilai Pengurangan Lebih dari 100 Maka listrik tidak stabil
-            if(len(self.comp_arr) == 2):
-                if(abs(self.real_time_volt - self.last_volt)) > 100:
-                    print("Tegangan Listrik Tidak Stabil")
-                    print(abs(self.last_volt - self.real_time_volt))
-                    self.comp_arr.pop(0)
-                    self.lowest_volt = self.comp_arr[-1]
-                    print(self.lowest_volt)
-
-                else:
-                    # Hapus Voltage Lama Jika Pengurangan dari dua nilai tidak lebih dari 100
-                    print("Tegangan Listrik Stabil")
-                    print("Sebelum di Pop")
-                    print(self.comp_arr)
-                    self.comp_arr.pop(0)
-                    print("Sesudah di Pop")
-                    print(self.comp_arr)
-
-            if(tegangan_listrik > 220):
-                self.arr_normal_volt.append(tegangan_listrik)
-                self.arr_normal_message.append(convertedDict)
-                self.arr_normal_topic.append(topic)
+            
 
 
-Server_gresik = Server()
-Server_gresik.run()
+Acaki_batam = Ac_aki()
+Acaki_batam.run()

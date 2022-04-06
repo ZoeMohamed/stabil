@@ -104,7 +104,7 @@ class Ac_aki():
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
 
-                        self.send_message(self.lowest_volt,self.topic,self.status)
+                        self.send_message(self.lowest_volt,self.topic,self.tool_status)
 
 
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
@@ -224,7 +224,7 @@ class Ac_aki():
             self.real_time_volt = self.comp_arr[-1]
 
             if(len(self.comp_arr) == 2):
-                if(abs(self.real_time_volt - self.last_volt)) >= 15:
+                if(abs(self.real_time_volt - self.last_volt)) >= 100:
                     print("Tegangan Listrik Tidak Stabil")
                     print(abs(self.last_volt - self.real_time_volt))
                     self.comp_arr.pop(0)
