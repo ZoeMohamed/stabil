@@ -31,7 +31,7 @@ class Server():
         self.password = os.getenv('MQTT_PASSWORD')
         self.connected = False
         self.Messagereceived = False
-        self.voltage_indicator = 209
+        self.voltage_indicator = 100
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
         self.low_volt = None
@@ -114,7 +114,7 @@ class Server():
 
                     elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_volt) != 0:
                         print("lebih dari 20 Mins")
-             
+
                         current_date = datetime.datetime.now()
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
@@ -137,46 +137,41 @@ class Server():
         else:
             print("Client is not connected")
 
-
-
-
-    def send_message(self,tegangan_listrik,topic,status):
+    def send_message(self, tegangan_listrik, topic, status):
         if(int(tegangan_listrik) < self.voltage_indicator):
             try:
 
                 for chat_id in self.check_status():
-                    self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))      
-
+                    self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" +
+                                         "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))
 
             except Exception as e:
                 print(e)
                 print("There is error when sendding a message")
                 self.Messagereceived = True
 
-    
-
     def check_status(self):
 
-            db= mysql.connector.connect(
-                        host=os.getenv('MYSQL_HOST'),
-                        user=os.getenv('MYSQL_USER'),
-                        password=os.getenv('MYSQL_PASSWORD'),
-                        database=os.getenv('MYSQL_DATABASE')
+        db = mysql.connector.connect(
+            host=os.getenv('MYSQL_HOST'),
+            user=os.getenv('MYSQL_USER'),
+            password=os.getenv('MYSQL_PASSWORD'),
+            database=os.getenv('MYSQL_DATABASE')
 
-                    )
-            mydb = db.cursor()
+        )
+        mydb = db.cursor()
 
-            list_of_chatid = []
-            mydb.execute('SELECT chat_id FROM ' + "user_teles " + ' WHERE status=' + str(1))
-            results = mydb.fetchall()
-            for row in results:
-                print(row)
-                list_of_chatid.append("".join(row))
-            
-            print(list(set(list_of_chatid)))
+        list_of_chatid = []
+        mydb.execute('SELECT chat_id FROM ' + "user_teles " +
+                     ' WHERE status=' + str(1))
+        results = mydb.fetchall()
+        for row in results:
+            print(row)
+            list_of_chatid.append("".join(row))
 
-            return list(set(list_of_chatid))
+        print(list(set(list_of_chatid)))
 
+        return list(set(list_of_chatid))
 
     def on_message(self, client, userdata, message):
 
@@ -213,14 +208,12 @@ class Server():
                     self.arr_normal_volt.append(tegangan_listrik)
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
-                    
-                    print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
+                    print("KALO LEN NYA 2 LISTRIK DAH STABIL")
 
                     print(self.arr_normal_volt)
                     print(self.arr_normal_message)
                     print(self.arr_normal_topic)
-
 
                     print("Tegangan Listrik Stabil")
                     print("Sebelum di Pop")
@@ -237,8 +230,6 @@ class Server():
                 print(self.arr_normal_volt)
                 print(self.arr_normal_message)
                 print(self.arr_normal_topic)
-
-            
 
 
 Server_gresik = Server()

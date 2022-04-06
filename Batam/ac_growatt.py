@@ -34,6 +34,9 @@ class Ac_growatt():
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
 
+        #  Volt indicator
+        self.voltage_indicator = 100
+
         # Inisialisasi Perubahan Voltage
         self.time_trigger = 20
         self.arr_normal_volt = []
@@ -243,7 +246,7 @@ class Ac_growatt():
             self.real_time_volt = self.comp_arr[-1]
 
             if(len(self.comp_arr) == 2):
-                if(abs(self.real_time_volt - self.last_volt)) >= 15:
+                if(abs(self.real_time_volt - self.last_volt)) >= self.voltage_indicator:
                     print("Tegangan Listrik Tidak Stabil")
                     print(abs(self.last_volt - self.real_time_volt))
                     self.comp_arr.pop(0)
