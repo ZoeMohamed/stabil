@@ -1,11 +1,20 @@
+# import datetime
+# import time
 
-from datetime import datetime, timedelta
+# now = datetime.datetime.now()
+# sekarang = now.hour*60+now.minute
+# time_stamp = sekarang
 
-now = datetime.now()
-mydate = datetime(2012, 9, 28, 10, 55)
-mystart = now.replace(hour=10, minute=55, second=0)
-myend = datetime.now() + timedelta(minutes=2)
 
-print(myend)
-if mystart <= mydate < myend:
-    print("dumb")
+# while True:
+#     now = datetime.datetime.now()
+#     sekarang = now.hour*60+now.minute
+#     print(sekarang - time_stamp)
+#     time.sleep(1)
+
+from importlib import import_module
+
+
+import random
+
+print(random.randint(210.20,220.30))

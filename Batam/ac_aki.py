@@ -1,6 +1,5 @@
 import time
 from dotenv import load_dotenv, set_key
-from numpy import empty
 import paho.mqtt.client as mqttclient
 import mysql.connector
 import random
@@ -39,7 +38,7 @@ class Ac_aki():
         self.voltage_indicator = 100
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 20
+        self.time_trigger = 1
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -95,7 +94,7 @@ class Ac_aki():
                 while True:
                     now = datetime.datetime.now()
                     sekarang = now.hour*60+now.minute
-                    print(sekarang - time_stamp)
+                    print(abs(sekarang - time_stamp))
                     time.sleep(1)
 
                     if self.lowest_volt is not None:
@@ -116,7 +115,7 @@ class Ac_aki():
 
                         self.lowest_volt = None
 
-                    elif(sekarang - time_stamp) >= self.time_trigger:
+                    elif(abs(sekarang - time_stamp)) >= self.time_trigger and len(self.arr_normal_message) != 0 and len(self.arr_normal_volt) != 0 and len(self.arr_normal_topic) != 0:
                         print("lebih dari 20 Mins")
 
                         current_date = datetime.datetime.now()

@@ -1,12 +1,16 @@
-from operator import truediv
-from sqlite3 import connect
-from dotenv import load_dotenv
-import mysql.connector
-from simplejson import load
-import telegram_send
 
+from importlib import import_module
+from dotenv import load_dotenv
+import paho.mqtt.client as mqttclient
+import mysql.connector
+
+import telegram_send
+import time
 import os
 import datetime
+
+
+import random
 
 # Load Env Key and Value
 load_dotenv()
@@ -14,9 +18,9 @@ class Power_meter():
     # Inisialisasi Variabel
     def __init__(self):
           
-            self.topic = "batam/powermeter"
+            self.topic = "gresik/powermeter"
             self.tool_status = "Online"
-            self.table_name = "powermeter_batams"
+            self.table_name = "powermeter_gresiks"
             self.username = os.getenv('MQTT_USERNAME')
             self.password = os.getenv('MQTT_PASSWORD')
             self.connected = False
@@ -51,40 +55,39 @@ class Power_meter():
 
           
 
-  
-  
-
 
 
     def on_message(self):
-        
-        dummy_message = "210.30,3.824,543.60,2.712,50.10,0.66,0.00,0.000,0.00,0.000,0.00,0.00,572,37.56,-1,1"
+        dict = {212.35:41.51,203.75:40.55,201.75:44.20,210.25:42.59,202.15:41.30,217.15:41.22,211.11:50.50,210.49:45.10,209.90:42.21,201.15:41.75}
+        for k,v in dict.items() :
+            dummy_message = f"{k},3.844,543.60,2.714,{v},0.66,0.00,0.000,0.00,0.000,0.00,0.00,572,37.56,-1,1"
+            topic = "batam/powermeter"
+            current_date = datetime.datetime.now()
+            formatted_date = datetime.date.strftime(current_date, "%m/%d/%Y/%H:%M:%S")  
+            volt_pln = dummy_message.split(",")[0]
+            arus_pln = dummy_message.split(",")[1]
+            power_pln = dummy_message.split(",")[2]
+            freq_pln = dummy_message.split(",")[3]
+            volt_genset = dummy_message.split(",")[4]
+            arus_genset = dummy_message.split(",")[5]
+            power_genset = dummy_message.split(",")[6]
+            freq_genset = dummy_message.split(",")[7]
+            full_dummy_message = dummy_message
 
-        topic = "gresik/powermeter"
-        current_date = datetime.datetime.now()
-        formatted_date = datetime.date.strftime(current_date, "%m/%d/%Y/%H:%M:%S")  
-        volt_pln = dummy_message.split(",")[0]
-        arus_pln = dummy_message.split(",")[1]
-        power_pln = dummy_message.split(",")[2]
-        freq_pln = dummy_message.split(",")[3]
-        volt_genset = dummy_message.split(",")[4]
-        arus_genset = dummy_message.split(",")[5]
-        power_genset = dummy_message.split(",")[6]
-        freq_genset = dummy_message.split(",")[7]
-        full_dummy_message = dummy_message
-
-        print(dummy_message)
-        print(topic)
-        print(arus_pln)
-        print(power_pln)
+            print(dummy_message)
+            print(topic)
+            print(arus_pln)
+            print(power_pln)
 
 
 
-        # # Insert to Db after receive message
-        self.insertDb(topic,full_dummy_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,formatted_date,current_date)
+            # # Insert to Db after receive message
+            self.insertDb(topic,full_dummy_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,formatted_date,current_date)
 
-        # # Send to telegram
-        # self.send_message(volt_pln,topic,self.tool_status)
+            # # Send to telegram
+            # self.send_message(volt_pln,topic,self.tool_status)
+
+            time.sleep(120)
 
 
     def insertDb(self,topic,full_message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,formatted_date,current_date):
