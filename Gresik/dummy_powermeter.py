@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import paho.mqtt.client as mqttclient
 import mysql.connector
 
-import telegram_send
 import time
 import os
 import datetime
@@ -102,15 +101,7 @@ class Power_meter():
             print("Fail save to db")
         else:
             print("Succesfully save to database ")
-    
-    def send_message(self,tegangan_listrik,topic,status):
-        if(float(tegangan_listrik) < self.voltage_indicator):
-            try:
-                telegram_send.send(messages=["Status : " + status + "\n" + "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik)])
-            except Exception as e:
-                print(e)
-                print("There is error when sendding a message")
-                self.Messagereceived = True
+
 
       
 
