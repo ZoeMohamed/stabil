@@ -1,25 +1,30 @@
-from pydoc import importfile
+ 
+import mysql.connector
+from dotenv import load_dotenv, set_key
+import os
+
+load_dotenv()
+
+def check_timedb():
+        db = mysql.connector.connect(
+            host=os.getenv('MYSQL_HOST'),
+            user=os.getenv('MYSQL_USER'),
+            password=os.getenv('MYSQL_PASSWORD'),
+            database=os.getenv('MYSQL_DATABASE')
+
+        )
+        mydb = db.cursor()
+
+        list_of_chatid = []
+        mydb.execute('SELECT waktu FROM ' + "set_time_datas")
+        results = mydb.fetchall()
+        for row in results:
+            print(row)
+            list_of_chatid.append("".join(row))
+
+        print(list(set(list_of_chatid)))
+
+        return list(set(list_of_chatid))
 
 
-import datetime
-
-import time
-
-
-now = datetime.datetime.now()
-sekarang = now.year*10000 + 100 * now.month  + now.day + now.hour*60+now.minute
-time_stamp = sekarang
-
-
-while True:
-    now = datetime.datetime.now()
-    sekarang = now.year*10000 + 100 * now.month  + now.day + now.hour*60+now.minute
-    print(abs(sekarang - time_stamp))
-    print(now.hour * 60 + now.minute)
-    print(now)
-    print(sekarang)
-    time.sleep(1)
-
-    if (abs(sekarang - time_stamp) >= 1445):
-        print("GG BANG")
-        time_stamp = sekarang
+check_timedb()

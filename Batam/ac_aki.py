@@ -38,7 +38,7 @@ class Ac_aki():
         self.voltage_indicator = 100
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 20
+        self.time_trigger = 1
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -89,16 +89,16 @@ class Ac_aki():
 
             while self.Messagereceived != True:
                 now = datetime.datetime.now()
-                sekarang = now.hour*60+now.minute
+                sekarang = now.year * 525600 + now.month * 43800 + now.day * 1440 + now.hour * 60 + now.minute
                 time_stamp = sekarang
                 while True:
                     now = datetime.datetime.now()
-                    sekarang = now.hour*60+now.minute
+                    sekarang = now.year * 525600 + now.month * 43800 + now.day * 1440 + now.hour * 60 + now.minute
                     print(now)
                     print(sekarang)
                     print(abs(sekarang - time_stamp))
                     print(sekarang - time_stamp)
-                    time.sleep(1)
+                    time.sleep(0.1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")
@@ -191,8 +191,7 @@ class Ac_aki():
         mydb = db.cursor()
 
         list_of_chatid = []
-        mydb.execute('SELECT chat_id FROM ' + "user_teles " +
-                     ' WHERE status=' + str(1))
+        mydb.execute('SELECT waktu FROM ' + "set_time_datas")
         results = mydb.fetchall()
         for row in results:
             print(row)
