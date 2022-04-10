@@ -36,7 +36,7 @@ class Powermeter():
         #  Volt indicator
         self.voltage_indicator = 100
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 20
+        self.time_trigger = 3
 
         self.arr_normal_voltgenset = []
         self.arr_normal_arusgenset = []
