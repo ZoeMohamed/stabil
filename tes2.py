@@ -1,15 +1,18 @@
-import datetime
-import time
 
 
-now = datetime.datetime.now()
-sekarang = now.hour*60+now.minute
-time_stamp = sekarang
-while True:
-    now = datetime.datetime.now()
-    sekarang = now.hour*60+now.minute
-    print(now)
-    print(sekarang)
-    print(time_stamp)
-    print(abs(sekarang - time_stamp))
-    time.sleep(1)
+def swap_case(s):
+    listOfStrings = []
+    for x in s:
+        if (x.isupper()):
+            x = x.lower()
+            listOfStrings.append(x)
+        else:
+            x = x.upper()
+            listOfStrings.append(x)
+
+    return "".join(listOfStrings)
+
+
+if __name__ == '__main__':
+    s = input()
+    result = swap_case(s)

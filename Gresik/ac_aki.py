@@ -1,3 +1,4 @@
+
 import time
 from dotenv import load_dotenv, set_key
 import paho.mqtt.client as mqttclient
@@ -22,24 +23,27 @@ class Ac_aki():
         self.broker_url = os.getenv('MQTT_HOST')
         self.broker_port = int(os.getenv('MQTT_PORT'))
         self.clean_session = True
-        self.topic = "tele/gresik/ac_aki/SENSOR"
-        self.status = "tele/gresik/ac_aki/LWT"
+        self.topic = "tele/batam/ac_aki/SENSOR"
+        self.status = "tele/batam/ac_aki/LWT"
         self.tool_status = ""
-        self.table_name = "acaki_gresiks"
-        self.client_id = f'python-mqtt-ac_aki_gresiks{random.randint(0, 1000)}'
+        self.table_name = "acaki_batams"
+        self.client_id = f'python-mqtt-ac_growatt_gresiks{random.randint(0, 1000)}'
         self.username = os.getenv('MQTT_USERNAME')
         self.password = os.getenv('MQTT_PASSWORD')
         self.connected = False
         self.Messagereceived = False
         self.token = os.getenv('TELEGRAM_API_TOKEN')
         self.bot = telegram.Bot(token=self.token)
+
         #  Volt indicator
         self.voltage_indicator = 100
+
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 20
+        self.time_trigger = 1
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
+
         self.comp_arr = []
         self.last_volt = None
         self.real_time_volt = None
@@ -85,15 +89,19 @@ class Ac_aki():
                 time.sleep(0.1)
 
             while self.Messagereceived != True:
-
                 now = datetime.datetime.now()
-                sekarang = now.hour*60+now.minute
+                sekarang = now.year * 525600 + now.month * 43800 + \
+                    now.day * 1440 + now.hour * 60 + now.minute
                 time_stamp = sekarang
                 while True:
                     now = datetime.datetime.now()
-                    sekarang = now.hour*60+now.minute
+                    sekarang = now.year * 525600 + now.month * 43800 + \
+                        now.day * 1440 + now.hour * 60 + now.minute
+                    print(now)
+                    print(sekarang)
+                    print(abs(sekarang - time_stamp))
                     print(sekarang - time_stamp)
-                    time.sleep(1)
+                    time.sleep(0.1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")
@@ -113,7 +121,7 @@ class Ac_aki():
 
                         self.lowest_volt = None
 
-                    elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_volt) != 0:
+                    elif(abs(sekarang - time_stamp)) >= self.time_trigger and len(self.arr_normal_message) != 0 and len(self.arr_normal_volt) != 0 and len(self.arr_normal_topic) != 0:
                         print("lebih dari 20 Mins")
 
                         current_date = datetime.datetime.now()
@@ -122,9 +130,11 @@ class Ac_aki():
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,date,created_at) VALUES (%s,%s,%s,%s,%s)", (
                             self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], formatted_date, current_date))
                         self.db.commit()
+
                         self.arr_normal_message = []
                         self.arr_normal_topic = []
                         self.arr_normal_volt = []
+                        self.time_trigger = self.check_timedb()
                         time_stamp = sekarang
 
             client.loop_stop()
@@ -184,17 +194,16 @@ class Ac_aki():
         )
         mydb = db.cursor()
 
-        list_of_chatid = []
-        mydb.execute('SELECT chat_id FROM ' + "user_teles " +
-                     ' WHERE status=' + str(1))
+        mydb.execute('SELECT waktu FROM ' + "set_time_datas")
         results = mydb.fetchall()
-        for row in results:
-            print(row)
-            list_of_chatid.append("".join(row))
 
-        print(list(set(list_of_chatid)))
+        str = "".join(results[-1])
+        print(str)
 
-        return list(set(list_of_chatid))
+        mydb.close()
+        db.close()
+
+        return int(str)
 
     def on_message(self, client, userdata, message):
 
@@ -215,6 +224,7 @@ class Ac_aki():
             print(convertedDict)
 
             self.comp_arr.append(tegangan_listrik)
+
             self.last_volt = self.comp_arr[0]
             self.real_time_volt = self.comp_arr[-1]
 
@@ -251,6 +261,7 @@ class Ac_aki():
                     print(self.comp_arr)
 
             elif(len(self.comp_arr) == 1):
+                print("MANTAP")
                 self.arr_normal_volt.append(tegangan_listrik)
                 self.arr_normal_message.append(convertedDict)
                 self.arr_normal_topic.append(topic)
@@ -260,5 +271,5 @@ class Ac_aki():
                 print(self.arr_normal_topic)
 
 
-Acaki_gresik = Ac_aki()
-Acaki_gresik.run()
+Acaki_batam = Ac_aki()
+Acaki_batam.run()
