@@ -8,7 +8,7 @@ import os
 import datetime
 import telegram
 from math import ceil
-from datetime import timedelta
+from datetime import date, timedelta
 from math import ceil
 import time
 
@@ -112,15 +112,13 @@ class Ac_growatt():
                         print(now)
                         print(sekarang)
                         print(time_stamp)
-                        current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(
-                            current_date, "%m/%d/%Y/%H:%M:%S")
 
                         self.send_message(self.lowest_volt,
                                           self.topic, self.tool_status)
 
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", (
-                            self.topics, str(self.full_message), self.lowest_volt, self.temperature, self.humidity, self.power, formatted_date, current_date))
+                            self.topics, str(self.full_message), self.lowest_volt, self.temperature, self.humidity, self.power, datetime.date.strftime(
+                                datetime.datetime.now(), "%m/%d/%Y/%H:%M:%S"), datetime.datetime.now()))
                         self.db.commit()
 
                         self.lowest_volt = None
@@ -131,11 +129,9 @@ class Ac_growatt():
                     elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_volt) != 0:
                         print("lebih dari 20 Mins")
 
-                        current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(
-                            current_date, "%m/%d/%Y/%H:%M:%S")
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", (
-                            self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], self.arr_normal_temperature[-1], self.arr_normal_humidity[-1], self.arr_normal_power[-1], formatted_date, current_date))
+                            self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], self.arr_normal_temperature[-1], self.arr_normal_humidity[-1], self.arr_normal_power[-1], datetime.date.strftime(
+                                datetime.datetime.now(), "%m/%d/%Y/%H:%M:%S"), datetime.datetime.now()))
                         self.db.commit()
                         self.arr_normal_message = []
                         self.arr_normal_topic = []

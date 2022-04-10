@@ -111,15 +111,13 @@ class Powermeter():
                         print(now)
                         print(sekarang)
                         print(time_stamp)
-                        current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(
-                            current_date, "%m/%d/%Y/%H:%M:%S")
 
                         self.send_message(self.lowest_volt,
                                           self.topic, self.tool_status)
 
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (
-                            self.arr_normal_topic[-1], self.arr_normal_message[-1], self.arr_normal_voltgenset[-1], self.arr_normal_arusgenset[-1], self.arr_normal_powergenset[-1], self.arr_normal_freqgenset[-1], self.arr_normal_voltpln[-1], self.arr_normal_aruspln[-1], self.arr_normal_powerpln[-1], self.arr_normal_freqpln[-1], formatted_date, current_date))
+                            self.arr_normal_topic[-1], self.arr_normal_message[-1], self.arr_normal_voltgenset[-1], self.arr_normal_arusgenset[-1], self.arr_normal_powergenset[-1], self.arr_normal_freqgenset[-1], self.arr_normal_voltpln[-1], self.arr_normal_aruspln[-1], self.arr_normal_powerpln[-1], self.arr_normal_freqpln[-1], datetime.date.strftime(
+                                datetime.datetime.now(), "%m/%d/%Y/%H:%M:%S"), datetime.datetime.now()))
                         self.db.commit()
 
                         self.lowest_volt = None
@@ -127,12 +125,9 @@ class Powermeter():
                     elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_voltpln) != 0:
                         print("lebih dari 20 Mins")
 
-                        current_date = datetime.datetime.now()
-                        formatted_date = datetime.date.strftime(
-                            current_date, "%m/%d/%Y/%H:%M:%S")
-
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt_genset,arus_genset,power_genset,freq_genset,volt_pln,arus_pln,power_pln,freq_pln,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (
-                            self.arr_normal_topic[-1], self.arr_normal_message[-1], self.arr_normal_voltgenset[-1], self.arr_normal_arusgenset[-1], self.arr_normal_powergenset[-1], self.arr_normal_freqgenset[-1], self.arr_normal_voltpln[-1], self.arr_normal_aruspln[-1], self.arr_normal_powerpln[-1], self.arr_normal_freqpln[-1], formatted_date, current_date))
+                            self.arr_normal_topic[-1], self.arr_normal_message[-1], self.arr_normal_voltgenset[-1], self.arr_normal_arusgenset[-1], self.arr_normal_powergenset[-1], self.arr_normal_freqgenset[-1], self.arr_normal_voltpln[-1], self.arr_normal_aruspln[-1], self.arr_normal_powerpln[-1], self.arr_normal_freqpln[-1], datetime.date.strftime(
+                                datetime.datetime.now(), "%m/%d/%Y/%H:%M:%S"), datetime.datetime.now()))
                         self.db.commit()
 
                         self.arr_normal_voltgenset = []
