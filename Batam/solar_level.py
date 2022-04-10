@@ -36,7 +36,7 @@ class Solar():
         #  Volt indicator
         self.voltage_indicator = 100
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 2
+        self.time_trigger = 20
         self.arr_normal_unit = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -124,7 +124,7 @@ class Solar():
                         self.db.commit()
                         self.arr_normal_message = []
                         self.arr_normal_topic = []
-                        self.arr_normal_unit= []
+                        self.arr_normal_unit = []
                         time_stamp = sekarang
 
             client.loop_stop()

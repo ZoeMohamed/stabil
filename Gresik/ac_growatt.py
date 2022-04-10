@@ -36,7 +36,7 @@ class Ac_growatt():
         #  Volt indicator
         self.voltage_indicator = 100
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 1
+        self.time_trigger = 20
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -103,7 +103,7 @@ class Ac_growatt():
                     sekarang = now.year * 525600 + now.month * 43800 + \
                         now.day * 1440 + now.hour * 60 + now.minute
                     print(sekarang - time_stamp)
-                    time.sleep(0.1)
+                    time.sleep(1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")
@@ -128,12 +128,14 @@ class Ac_growatt():
 
                     elif(sekarang - time_stamp) >= self.time_trigger and len(self.arr_normal_volt) != 0:
                         print("lebih dari 20 Mins")
+                        print("time trig" + str(self.time_trigger))
 
                         current_date = datetime.datetime.now()
                         formatted_date = datetime.date.strftime(
                             current_date, "%m/%d/%Y/%H:%M:%S")
                         self.mydb.execute(f"INSERT INTO {self.table_name} (topic,message,volt,temperature,humidity,power,date,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", (
                             self.arr_normal_topic[-1], str(self.arr_normal_message[-1]), self.arr_normal_volt[-1], self.arr_normal_temperature[-1], self.arr_normal_humidity[-1], self.arr_normal_power[-1], formatted_date, current_date))
+
                         self.db.commit()
                         self.arr_normal_message = []
                         self.arr_normal_topic = []
@@ -301,5 +303,5 @@ class Ac_growatt():
                 print(self.arr_normal_topic)
 
 
-Ac_growatt_batam = Ac_growatt()
-Ac_growatt_batam.run()
+Ac_growatt_gresik = Ac_growatt()
+Ac_growatt_gresik.run()

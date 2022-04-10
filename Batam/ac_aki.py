@@ -38,7 +38,7 @@ class Ac_aki():
         self.voltage_indicator = 100
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 1
+        self.time_trigger = 20
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -89,16 +89,18 @@ class Ac_aki():
 
             while self.Messagereceived != True:
                 now = datetime.datetime.now()
-                sekarang = now.year * 525600 + now.month * 43800 + now.day * 1440 + now.hour * 60 + now.minute
+                sekarang = now.year * 525600 + now.month * 43800 + \
+                    now.day * 1440 + now.hour * 60 + now.minute
                 time_stamp = sekarang
                 while True:
                     now = datetime.datetime.now()
-                    sekarang = now.year * 525600 + now.month * 43800 + now.day * 1440 + now.hour * 60 + now.minute
+                    sekarang = now.year * 525600 + now.month * 43800 + \
+                        now.day * 1440 + now.hour * 60 + now.minute
                     print(now)
                     print(sekarang)
                     print(abs(sekarang - time_stamp))
                     print(sekarang - time_stamp)
-                    time.sleep(0.1)
+                    time.sleep(1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")
@@ -131,6 +133,7 @@ class Ac_aki():
                         self.arr_normal_message = []
                         self.arr_normal_topic = []
                         self.arr_normal_volt = []
+                        self.time_trigger = self.check_timedb()
                         time_stamp = sekarang
 
             client.loop_stop()
@@ -190,16 +193,16 @@ class Ac_aki():
         )
         mydb = db.cursor()
 
-        list_of_chatid = []
         mydb.execute('SELECT waktu FROM ' + "set_time_datas")
         results = mydb.fetchall()
-        for row in results:
-            print(row)
-            list_of_chatid.append("".join(row))
 
-        print(list(set(list_of_chatid)))
+        str = "".join(results[-1])
+        print(str)
 
-        return list(set(list_of_chatid))
+        mydb.close()
+        db.close()
+
+        return int(str)
 
     def on_message(self, client, userdata, message):
 

@@ -23,10 +23,10 @@ class Ac_aki():
         self.broker_url = os.getenv('MQTT_HOST')
         self.broker_port = int(os.getenv('MQTT_PORT'))
         self.clean_session = True
-        self.topic = "tele/batam/ac_aki/SENSOR"
-        self.status = "tele/batam/ac_aki/LWT"
+        self.topic = "tele/gresik/ac_aki/SENSOR"
+        self.status = "tele/gresik/ac_aki/LWT"
         self.tool_status = ""
-        self.table_name = "acaki_batams"
+        self.table_name = "acaki_gresiks"
         self.client_id = f'python-mqtt-ac_growatt_gresiks{random.randint(0, 1000)}'
         self.username = os.getenv('MQTT_USERNAME')
         self.password = os.getenv('MQTT_PASSWORD')
@@ -39,7 +39,7 @@ class Ac_aki():
         self.voltage_indicator = 100
 
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 1
+        self.time_trigger = 20
         self.arr_normal_volt = []
         self.arr_normal_message = []
         self.arr_normal_topic = []
@@ -101,7 +101,7 @@ class Ac_aki():
                     print(sekarang)
                     print(abs(sekarang - time_stamp))
                     print(sekarang - time_stamp)
-                    time.sleep(0.1)
+                    time.sleep(1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")
@@ -271,5 +271,5 @@ class Ac_aki():
                 print(self.arr_normal_topic)
 
 
-Acaki_batam = Ac_aki()
-Acaki_batam.run()
+Acaki_gresik = Ac_aki()
+Acaki_gresik.run()

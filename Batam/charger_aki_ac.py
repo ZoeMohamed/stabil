@@ -87,11 +87,13 @@ class Cctv():
             while self.Messagereceived != True:
 
                 now = datetime.datetime.now()
-                sekarang = now.hour*60+now.minute
+                sekarang = now.year * 525600 + now.month * 43800 + \
+                    now.day * 1440 + now.hour * 60 + now.minute
                 time_stamp = sekarang
                 while True:
                     now = datetime.datetime.now()
-                    sekarang = now.hour*60+now.minute
+                    sekarang = now.year * 525600 + now.month * 43800 + \
+                        now.day * 1440 + now.hour * 60 + now.minute
                     print(sekarang - time_stamp)
                     time.sleep(1)
 
@@ -125,6 +127,8 @@ class Cctv():
                         self.arr_normal_message = []
                         self.arr_normal_topic = []
                         self.arr_normal_volt = []
+
+                        self.time_trigger = self.check_timedb()
                         time_stamp = sekarang
 
             client.loop_stop()
@@ -139,62 +143,61 @@ class Cctv():
             print("Client is not connected")
 
     def send_message(self, tegangan_listrik, topic, status):
-            print("Masuk ke send message")
-            try:
+        print("Masuk ke send message")
+        try:
 
-                for chat_id in self.check_status():
-                    self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" +
-                                         "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))
+            for chat_id in self.check_status():
+                self.bot.sendMessage(chat_id=chat_id, text="Status : " + status + "\n" +
+                                     "Topic On : " + topic + "\n" + "Tegangan Listrik : " + str(tegangan_listrik))
 
-            except Exception as e:
-                print(e)
-                print("There is error when sendding a message")
-                self.Messagereceived = True
+        except Exception as e:
+            print(e)
+            print("There is error when sendding a message")
+            self.Messagereceived = True
 
     def check_status(self):
 
-            db = mysql.connector.connect(
-                        host=os.getenv('MYSQL_HOST'),
-                        user=os.getenv('MYSQL_USER'),
-                        password=os.getenv('MYSQL_PASSWORD'),
-                        database=os.getenv('MYSQL_DATABASE')
+        db = mysql.connector.connect(
+            host=os.getenv('MYSQL_HOST'),
+            user=os.getenv('MYSQL_USER'),
+            password=os.getenv('MYSQL_PASSWORD'),
+            database=os.getenv('MYSQL_DATABASE')
 
-                    )
-            mydb = db.cursor()
+        )
+        mydb = db.cursor()
 
-            list_of_chatid = []
-            mydb.execute('SELECT chat_id FROM ' +
-                         "user_teles " + ' WHERE status=' + str(1))
-            results = mydb.fetchall()
-            for row in results:
-                print(row)
-                list_of_chatid.append("".join(row))
+        list_of_chatid = []
+        mydb.execute('SELECT chat_id FROM ' +
+                     "user_teles " + ' WHERE status=' + str(1))
+        results = mydb.fetchall()
+        for row in results:
+            print(row)
+            list_of_chatid.append("".join(row))
 
-            print(list(set(list_of_chatid)))
+        print(list(set(list_of_chatid)))
 
-            return list(set(list_of_chatid))
+        return list(set(list_of_chatid))
 
     def check_timedb(self):
-            db = mysql.connector.connect(
-                        host=os.getenv('MYSQL_HOST'),
-                        user=os.getenv('MYSQL_USER'),
-                        password=os.getenv('MYSQL_PASSWORD'),
-                        database=os.getenv('MYSQL_DATABASE')
+        db = mysql.connector.connect(
+            host=os.getenv('MYSQL_HOST'),
+            user=os.getenv('MYSQL_USER'),
+            password=os.getenv('MYSQL_PASSWORD'),
+            database=os.getenv('MYSQL_DATABASE')
 
-                    )
-            mydb = db.cursor()
+        )
+        mydb = db.cursor()
 
-            list_of_chatid = []
-            mydb.execute('SELECT chat_id FROM ' +
-                         "user_teles " + ' WHERE status=' + str(1))
-            results = mydb.fetchall()
-            for row in results:
-                print(row)
-                list_of_chatid.append("".join(row))
+        mydb.execute('SELECT waktu FROM ' + "set_time_datas")
+        results = mydb.fetchall()
 
-            print(list(set(list_of_chatid)))
+        str = "".join(results[-1])
+        print(str)
 
-            return list(set(list_of_chatid))
+        mydb.close()
+        db.close()
+
+        return int(str)
 
     def on_message(self, client, userdata, message):
 
@@ -219,7 +222,7 @@ class Cctv():
             self.real_time_volt = self.comp_arr[-1]
 
             if(len(self.comp_arr) == 2):
-                if(abs(self.real_time_volt - self.last_volt)) >=self.voltage_indicator:
+                if(abs(self.real_time_volt - self.last_volt)) >= self.voltage_indicator:
                     print("Tegangan Listrik Tidak Stabil")
                     print(abs(self.last_volt - self.real_time_volt))
                     self.comp_arr.pop(0)
@@ -232,7 +235,6 @@ class Cctv():
                     self.arr_normal_message.append(convertedDict)
                     self.arr_normal_topic.append(topic)
 
-                 
                     if(len(self.arr_normal_volt) == 2 and len(self.arr_normal_message) == 2 and len(self.arr_normal_topic) == 2):
                         self.arr_normal_volt.pop(0)
                         self.arr_normal_message.pop(0)
@@ -259,8 +261,6 @@ class Cctv():
                 print(self.arr_normal_volt)
                 print(self.arr_normal_message)
                 print(self.arr_normal_topic)
-
-            
 
 
 Cctv_batam = Cctv()
