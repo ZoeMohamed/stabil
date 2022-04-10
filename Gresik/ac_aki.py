@@ -101,7 +101,7 @@ class Ac_aki():
                     print(sekarang)
                     print(abs(sekarang - time_stamp))
                     print(sekarang - time_stamp)
-                    time.sleep(1)
+                    time.sleep(0.1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")

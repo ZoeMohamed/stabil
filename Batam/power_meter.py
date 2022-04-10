@@ -36,7 +36,7 @@ class Powermeter():
         #  Volt indicator
         self.voltage_indicator = 100
         # Inisialisasi Perubahan Voltage
-        self.time_trigger = 3
+        self.time_trigger = 20
 
         self.arr_normal_voltgenset = []
         self.arr_normal_arusgenset = []
@@ -104,7 +104,7 @@ class Powermeter():
                     sekarang = now.year * 525600 + now.month * 43800 + \
                         now.day * 1440 + now.hour * 60 + now.minute
                     print(sekarang - time_stamp)
-                    time.sleep(1)
+                    time.sleep(0.1)
 
                     if self.lowest_volt is not None:
                         print("kurang dari 20 Mins")
