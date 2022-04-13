@@ -10,7 +10,9 @@ python3.7 ${PWD}/Gresik/ais.py &
 python3.7 ${PWD}/Gresik/cctv.py &
 python3.7 ${PWD}/Gresik/mikrotik.py &
 python3.7 ${PWD}/Gresik/server.py &
-python3.7 ${PWD}/Gresik/ac_aki.py 
+python3.7 ${PWD}/Gresik/ac_aki.py &
+python3.7 ${PWD}/Batam/solar_level.py 
+python3.7 ${PWD}/Batam/power_meter.py 
 
 
 
